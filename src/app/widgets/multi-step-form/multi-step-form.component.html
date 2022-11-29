@@ -1,0 +1,35 @@
+<tui-stepper
+  [activeItemIndex]="0"
+>
+  <button
+    *ngFor="let step of steps"
+    tuiStep
+    [disabled]="true"
+    class="tui-button"
+  >
+    {{ step }}
+  </button>
+</tui-stepper>
+
+<ng-container [ngSwitch]="currentStepBs | async">
+  <form
+    *ngSwitchCase="'uploadingFile'"
+  >
+    <button (click)="changeStep(currentStepBs.value)">button</button>
+  </form>
+  <div
+    *ngSwitchCase="'signIn'"
+  >
+    <button (click)="changeStep(currentStepBs.value)">button</button>
+  </div>
+  <form
+    *ngSwitchCase="'actualizing'"
+  >
+    <button (click)="changeStep(currentStepBs.value)">button</button>
+  </form>
+  <form
+    *ngSwitchCase="'downloading'"
+  >
+    <button (click)="changeStep(currentStepBs.value)"></button>
+  </form>
+</ng-container>
