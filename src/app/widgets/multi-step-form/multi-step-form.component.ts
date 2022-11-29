@@ -1,8 +1,14 @@
 import {Component} from '@angular/core';
-import {BehaviorSubject, Observable, Subject} from "rxjs";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {BehaviorSubject, finalize, map, Observable, of, Subject, switchMap, timer} from "rxjs";
+import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import { TuiFileLike } from '@taiga-ui/kit';
 
 type Step = 'uploadingFile' | 'signIn' | 'actualizing' | 'downloading';
+
+const stepLabels = [`Загружаем реестр и выписки ЕГРН`,
+  `Входим в личный кабинет`,
+  `Актуализируем`,
+  `Скачиваем обновленный реестр`];
 
 @Component({
   selector: 'app-multi-step-form',
@@ -11,23 +17,28 @@ type Step = 'uploadingFile' | 'signIn' | 'actualizing' | 'downloading';
 })
 export class MultiStepFormComponent {
 
-  readonly steps = [`Загружаем реестр и выписки ЕГРН`,
-    `Входим в личный кабинет`,
-    `Актуализируем`,
-    `Скачиваем обновленный реестр`];
+  stepLabels: Array<string>;
 
-  currentStepBs: BehaviorSubject<Step> = new BehaviorSubject<Step>('uploadingFile');
-  public userForm: FormGroup;
+  currentStepBs: BehaviorSubject<Step>;
+  currentStepIndex: number
+
+  public formGroup: FormGroup;
 
   constructor(private _fb: FormBuilder) {
-    this.userForm = this._fb.group({
-      personalInfo: null,
-      loginInfo: null
+    this.formGroup = this._fb.group({
+      uploadFile: null,
+      email: ['mail@mail.ru',[Validators.required,Validators.email]]
     });
-  }
 
-  subformInitialized(name: string, group: FormGroup) {
-    this.userForm.setControl(name, group);
+    this.loadingFiles$ = new Subject<TuiFileLike | null>()
+    this.loadedFiles$ = this.formGroup.controls["uploadFile"].valueChanges.pipe(
+      switchMap(file => (file ? this.makeRequest(file) : of(null))),
+    );
+
+    this.stepLabels = stepLabels
+    this.currentStepBs = new BehaviorSubject<Step>('uploadingFile')
+
+    this.currentStepIndex = 0
   }
 
   changeStep(currentStep: Step) {
@@ -45,9 +56,19 @@ export class MultiStepFormComponent {
           this.currentStepBs.next('downloading');
         break;
     }
+    this.currentStepIndex++;
   }
 
-  submitForm() {
-    const formValues = this.userForm.value;
+  readonly loadingFiles$;
+  readonly loadedFiles$;
+  makeRequest(file: TuiFileLike): Observable<TuiFileLike | null> {
+    this.loadingFiles$.next(file);
+
+    return timer(3000).pipe(
+      map(() => {
+          return file;
+      }),
+      finalize(() => this.loadingFiles$.next(null)),
+    );
   }
 }

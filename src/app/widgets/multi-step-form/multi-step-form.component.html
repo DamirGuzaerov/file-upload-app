@@ -1,8 +1,9 @@
 <tui-stepper
-  [activeItemIndex]="0"
+  [activeItemIndex]="currentStepIndex"
+  class="center"
 >
   <button
-    *ngFor="let step of steps"
+    *ngFor="let step of stepLabels"
     tuiStep
     [disabled]="true"
     class="tui-button"
@@ -14,22 +15,90 @@
 <ng-container [ngSwitch]="currentStepBs | async">
   <form
     *ngSwitchCase="'uploadingFile'"
+    class="tui-space_top-5 tui-form"
+    [formGroup]="formGroup"
   >
-    <button (click)="changeStep(currentStepBs.value)">button</button>
+    <ng-container *ngIf="!formGroup.controls['uploadFile'].value">
+      <div class="tui-form__row tui-form__row_multi-fields center tui-container tui-container_adaptive">
+        <div class="tui-form__multi-field tui-space_horizontal-0">
+          <tui-input-files
+            accept="image/*"
+            link=" "
+            formControlName="uploadFile"
+            [label]="'Выберите файл реестра'"
+          ></tui-input-files>
+        </div>
+        <div class="tui-space_horizontal-5">
+          или
+        </div>
+        <div class="tui-form__multi-field tui-space_horizontal-0">
+          <tui-input-files
+            accept=".zip,.rar,.7zip"
+            link=" "
+            formControlName="uploadFile"
+            [label]="'Выберите zip архивы выписок'"
+          ></tui-input-files>
+        </div>
+      </div>
+    </ng-container>
+
+    <tui-files class="tui-space_top-5">
+      <ng-container *ngIf="loadingFiles$ | async as file">
+        <div class="tui-row center">
+          <div class="tui-col">
+            <tui-file
+              [file]="file"
+              state="loading"
+            ></tui-file>
+          </div>
+          <div class="tui-space_horizontal-4">
+            или
+          </div>
+          <div class="tui-col">
+            <tui-file
+              [file]="file"
+              state="loading"
+            ></tui-file>
+          </div>
+        </div>
+      </ng-container>
+    </tui-files>
+    <div class="tui-container">
+      <app-progress-bar
+        title="Ищем кадастровые номера:"
+        (isFinished)=changeStep(currentStepBs.value)
+        *ngIf="loadedFiles$ | async"
+      ></app-progress-bar>
+    </div>
   </form>
-  <div
-    *ngSwitchCase="'signIn'"
+  <form [formGroup]="formGroup"
+        *ngSwitchCase="'signIn'"
+        class="tui-space_top-5"
   >
-    <button (click)="changeStep(currentStepBs.value)">button</button>
-  </div>
+    <div class="tui-form__row center tui-container">
+        <tui-input formControlName="email" class="tui-col_6">
+          Введите ваш email
+          <input
+            tuiTextfield
+            type="email"/>
+        </tui-input>
+        <button
+          tuiButton
+          type="button"
+          appearance="primary"
+          (click)="changeStep(currentStepBs.value)"
+          class="tui-col_4"
+        >
+          Отправить код для входа
+        </button>
+      </div>
+  </form>
   <form
     *ngSwitchCase="'actualizing'"
   >
-    <button (click)="changeStep(currentStepBs.value)">button</button>
   </form>
   <form
     *ngSwitchCase="'downloading'"
   >
-    <button (click)="changeStep(currentStepBs.value)"></button>
   </form>
 </ng-container>

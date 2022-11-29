@@ -1,17 +1,19 @@
-import { TuiRootModule } from "@taiga-ui/core";
+import {TuiButtonModule, TuiRootModule} from "@taiga-ui/core";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import {TuiProgressModule, TuiStepperModule} from "@taiga-ui/kit";
+import {TuiInputFilesModule, TuiInputModule, TuiProgressModule, TuiStepperModule} from "@taiga-ui/kit";
 import { MultiStepFormComponent } from './widgets/multi-step-form/multi-step-form.component';
 import {ReactiveFormsModule} from "@angular/forms";
+import { ProgressBarComponent } from './components/progress-bar/progress-bar.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    MultiStepFormComponent
+    MultiStepFormComponent,
+    ProgressBarComponent
   ],
   imports: [
     BrowserModule,
@@ -19,7 +21,10 @@ import {ReactiveFormsModule} from "@angular/forms";
     TuiRootModule,
     TuiProgressModule,
     TuiStepperModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TuiInputFilesModule,
+    TuiInputModule,
+    TuiButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent]
